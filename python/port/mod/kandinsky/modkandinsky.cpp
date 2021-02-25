@@ -6,6 +6,7 @@ extern "C" {
 #include <ion.h>
 #include "port.h"
 #include <math.h>
+#define PI 3.14159265358979323846
 
 
 static mp_obj_t TupleForKDColor(KDColor c) {
@@ -92,7 +93,6 @@ mp_obj_t modkandinsky_draw_rect(size_t n_args, const mp_obj_t * args) {
   mp_int_t y = mp_obj_get_int(args[1]);
   mp_int_t width = mp_obj_get_int(args[2]);
   mp_int_t height = mp_obj_get_int(args[3]);
-  mp_int_t stroke = mp_obj_get_int(args[4]);
   if (width < 0) {
     width = -width;
     x = x - width;
@@ -109,7 +109,6 @@ mp_obj_t modkandinsky_draw_rect(size_t n_args, const mp_obj_t * args) {
   KDRect rectLeft(x, y, stroke, height);
   KDColor color = MicroPython::Color::Parse(args[5]);
   MicroPython::ExecutionEnvironment::currentExecutionEnvironment()->displaySandbox();
-  KDIonContext::sharedContext()->fillRect(rect, color);
   KDIonContext::sharedContext()->fillRect(rectTop, color);
   KDIonContext::sharedContext()->fillRect(rectRight, color);
   KDIonContext::sharedContext()->fillRect(rectBottom, color);
@@ -139,8 +138,8 @@ mp_obj_t modkandinsky_draw_ellipse(size_t n_args, const mp_obj_t * args) {
   for (float t = PI/(a*3.5); t < PI; t += PI/(a*3.5)) {
     int oldx = _x;
     int oldy = _x;
-    _x = (int)(a*std::cos(t));
-    _y = (int)(b*std::sin(t));
+    _x = (int)(a*cos(t));
+    _y = (int)(b*sin(t));
     if (oldx != _x || oldy != _y) {
       KDPoint pointUpLeft(x-_x,y-_y);
       KDPoint pointUpRight(x+_x,y-_y);
@@ -167,8 +166,8 @@ mp_obj_t modkandinsky_fill_ellipse(size_t n_args, const mp_obj_t * args) {
   MicroPython::ExecutionEnvironment::currentExecutionEnvironment()->displaySandbox();
   for (float t = PI/(a*3.5); t < PI/2; t += PI/(a*3.5)) {
     int oldx = _x;
-    _x = (int)(a*std::cos(t));
-    _y = (int)(b*std::sin(t));
+    _x = (int)(a*cos(t));
+    _y = (int)(b*sin(t));
     if (oldx != _x) {
       KDRect rectLeft(x-_x,y-_y,1,_y*2);
       KDRect rectRight(x+_x,y-_y,1,_y*2);
