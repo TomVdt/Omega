@@ -62,7 +62,7 @@ mp_obj_t modkandinsky_draw_string(size_t n_args, const mp_obj_t * args) {
   KDColor textColor = (n_args >= 4) ? MicroPython::Color::Parse(args[3]) : KDColorBlack;
   KDColor backgroundColor = (n_args >= 5) ? MicroPython::Color::Parse(args[4]) : KDColorWhite;
   MicroPython::ExecutionEnvironment::currentExecutionEnvironment()->displaySandbox();
-  KDIonContext::sharedContext()->drawString(text, point, KDFont::LargeFont, textColor, backgroundColor);
+  KDIonContext::sharedContext()->drawString(text, point, (n_args >= 6) ?((mp_obj_get_int(args[5])) ? KDFont::SmallFont : KDFont::LargeFont) : KDFont::LargeFont, textColor, backgroundColor);
   return mp_const_none;
 }
 
@@ -83,6 +83,97 @@ mp_obj_t modkandinsky_fill_rect(size_t n_args, const mp_obj_t * args) {
   KDColor color = MicroPython::Color::Parse(args[4]);
   MicroPython::ExecutionEnvironment::currentExecutionEnvironment()->displaySandbox();
   KDIonContext::sharedContext()->fillRect(rect, color);
+  return mp_const_none;
+}
+
+mp_obj_t modkandinsky_draw_rect(size_t n_args, const mp_obj_t * args) {
+  mp_int_t x = mp_obj_get_int(args[0]);
+  mp_int_t y = mp_obj_get_int(args[1]);
+  mp_int_t width = mp_obj_get_int(args[2]);
+  mp_int_t height = mp_obj_get_int(args[3]);
+  if (width < 0) {
+    width = -width;
+    x = x - width;
+  }
+  if (height < 0) {
+    height = -height;
+    y = y - height;
+  }
+  int rightStrt = x+width-stroke;
+  int leftStrt = y+height-stroke;
+  KDRect rectTop(x, y, width, stroke);
+  KDRect rectRight(rightStrt, y, stroke, height);
+  KDRect rectBottom(x, leftStrt, width, stroke);
+  KDRect rectLeft(x, y, stroke, height);
+  KDColor color = MicroPython::Color::Parse(args[5]);
+  MicroPython::ExecutionEnvironment::currentExecutionEnvironment()->displaySandbox();
+  KDIonContext::sharedContext()->fillRect(rect, color);
+  KDIonContext::sharedContext()->fillRect(rectTop, color);
+  KDIonContext::sharedContext()->fillRect(rectRight, color);
+  KDIonContext::sharedContext()->fillRect(rectBottom, color);
+  KDIonContext::sharedContext()->fillRect(rectLeft, color);
+  return mp_const_none;
+}
+
+mp_obj_t modkandinsky_draw_line(size_t n_args, const mp_obj_t * args){
+  KDPoint point1(mp_obj_get_int(args[0]), mp_obj_get_int(args[1]));
+  KDPoint point2(mp_obj_get_int(args[2]), mp_obj_get_int(args[3]));
+  KDColor color = MicroPython::Color::Parse(args[4]);
+  MicroPython::ExecutionEnvironment::currentExecutionEnvironment()->displaySandbox();
+  KDIonContext::sharedContext()->drawLine(point1, point2, color);
+  return mp_const_none;
+}
+
+mp_obj_t modkandinsky_draw_ellipse(size_t n_args, const mp_obj_t * args) {
+  mp_int_t x = mp_obj_get_int(args[0]);
+  mp_int_t y = mp_obj_get_int(args[1]);
+  mp_int_t a = mp_obj_get_int(args[2]);
+  mp_int_t b = mp_obj_get_int(args[3]);
+  KDColor color = MicroPython::Color::Parse(args[4]);
+  int _x = 0;
+  int _y = 0;
+
+  MicroPython::ExecutionEnvironment::currentExecutionEnvironment()->displaySandbox();
+  for (float t = PI/(a*3.5); t < PI; t += PI/(a*3.5)) {
+    int oldx = _x;
+    int oldy = _x;
+    _x = (int)(a*std::cos(t));
+    _y = (int)(b*std::sin(t));
+    if (oldx != _x || oldy != _y) {
+      KDPoint pointUpLeft(x-_x,y-_y);
+      KDPoint pointUpRight(x+_x,y-_y);
+      KDPoint pointDownLeft(x-_x,y+_y);
+      KDPoint pointDownRight(x+_x,y+_y);
+      KDIonContext::sharedContext()->setPixel(pointUpLeft, color);
+      KDIonContext::sharedContext()->setPixel(pointUpRight, color);
+      KDIonContext::sharedContext()->setPixel(pointDownLeft, color);
+      KDIonContext::sharedContext()->setPixel(pointDownRight, color);
+    }
+  }
+  return mp_const_none;
+}
+
+mp_obj_t modkandinsky_fill_ellipse(size_t n_args, const mp_obj_t * args) {
+  mp_int_t x = mp_obj_get_int(args[0]);
+  mp_int_t y = mp_obj_get_int(args[1]);
+  mp_int_t a = mp_obj_get_int(args[2]);
+  mp_int_t b = mp_obj_get_int(args[3]);
+  KDColor color = MicroPython::Color::Parse(args[4]);
+  int _x = 0;
+  int _y = 0;
+
+  MicroPython::ExecutionEnvironment::currentExecutionEnvironment()->displaySandbox();
+  for (float t = PI/(a*3.5); t < PI/2; t += PI/(a*3.5)) {
+    int oldx = _x;
+    _x = (int)(a*std::cos(t));
+    _y = (int)(b*std::sin(t));
+    if (oldx != _x) {
+      KDRect rectLeft(x-_x,y-_y,1,_y*2);
+      KDRect rectRight(x+_x,y-_y,1,_y*2);
+      KDIonContext::sharedContext()->fillRect(rectLeft, color);
+      KDIonContext::sharedContext()->fillRect(rectRight, color);
+    }
+  }
   return mp_const_none;
 }
 
