@@ -93,6 +93,7 @@ mp_obj_t modkandinsky_draw_rect(size_t n_args, const mp_obj_t * args) {
   mp_int_t y = mp_obj_get_int(args[1]);
   mp_int_t width = mp_obj_get_int(args[2]);
   mp_int_t height = mp_obj_get_int(args[3]);
+  mp_int_t stroke = mp_obj_get_int(args[4]);
   if (width < 0) {
     width = -width;
     x = x - width;
